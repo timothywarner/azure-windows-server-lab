@@ -11,19 +11,20 @@ This repository offers a **ready-to-use, Azure-based lab** for exploring the fea
 ### **Name:** Azure Windows Server Lab
 
 ### **Short Description:**
-Easily deploy an Azure-based lab to explore mixed-mode domain configurations with Windows Server 2022 and 2025 using Bicep and Azure best practices.
+Easily deploy an Azure-based lab to explore mixed-mode domain configurations with Windows Server 2022 and 2025 using Bicep, Template Specs, and Azure CLI.
 
 ### **Purpose:**
 - Provide an **MVP-ready** lab environment for Windows Server testing.
 - Support a **mixed-mode domain** with multiple Windows Server versions.
 - Enable **modular deployments** using **Bicep**.
+- Utilize **Template Specs** for reusable and versioned infrastructure.
 - Promote best practices in Azure architecture, GitHub workflows, and documentation.
 
 ### **Audience:**
 - IT Professionals
 - Developers
 - Educators
-- Enthusiasts 
+- Enthusiasts
 
 ---
 
@@ -42,12 +43,16 @@ Easily deploy an Azure-based lab to explore mixed-mode domain configurations wit
    - Modular Bicep templates for VNet, NSGs, VMs, and more.
    - Centralized variables for quick customization.
 
-4. **GitHub Excellence:**
+4. **Template Specs for Versioning:**
+   - Publish Bicep templates as Template Specs for reusability and consistency.
+   - Easily manage versioned deployments.
+
+5. **GitHub Excellence:**
    - CI/CD workflows with build badges.
    - Comprehensive and beautifully structured README.
    - Inclusive and mindful design.
 
-5. **Global Inclusivity:**
+6. **Global Inclusivity:**
    - Designed to accommodate diverse users worldwide.
    - Written with clear, accessible language.
 
@@ -55,85 +60,18 @@ Easily deploy an Azure-based lab to explore mixed-mode domain configurations wit
 
 ## 🛠️ Getting Started
 
-### **Pre-Requisites**
+### **Prerequisites**
 
 1. **Azure Subscription:** [Sign up for free](https://azure.microsoft.com/free/).
-2. **Azure CLI:** Install and configure. Use the included deployment script to check and install it if needed.
-3. **GitHub Account:** Clone or fork this repository to get started.
+2. **Azure CLI:** The deployment scripts will guide you to install it if not present.
 
-### **Quick Start**
+### Deployment Instructions
 
+#### macOS/Linux
+Run the following commands:
 ```bash
-# Clone the repository
-git clone https://github.com/timothywarner/azure-windows-server-lab.git
+# Navigate to the repo directory
 cd azure-windows-server-lab
 
-# Deploy the lab
-az deployment sub create --template-file main.bicep --parameters @parameters.json
-```
-
----
-
-## 🔗 Competition and Inspirations
-
-### **Existing Projects:**
-- [MSLab](https://github.com/microsoft/MSLab): A resource for Hyper-V environments.
-- [AdaptiveCloudLabKit](https://github.com/thomasmaurer/AdaptiveCloudLabKit): Focused on Azure Stack HCI.
-- [Windows Server on Hyper-V](https://github.com/Curious4Tech/Windows-Server-on-Hyper-V): Hyper-V-centric testing environment.
-
-This lab builds upon the best ideas from these projects while offering a **cloud-native, Azure-focused solution.**
-
----
-
-## 💡 Why Bicep?
-
-- **Native Azure Integration:** Simplifies deployment with seamless Azure Resource Manager (ARM) integration.
-- **Human-Readable Syntax:** Makes infrastructure as code accessible to everyone.
-- **Modularity:** Supports easy customization and scalability.
-
----
-
-## 🧠 Variables and Customization
-
-All deployment variables are centralized in `parameters.json` for ease of use. Modify them to:
-- Adjust region or resource names.
-- Configure the VM sizes and OS images.
-
----
-
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## ✍️ Contributions
-
-All contributions are welcome! Please follow the [Contributing Guide](CONTRIBUTING.md) to submit your ideas, bug fixes, or improvements.
-
----
-
-## 📣 Community
-
-Join the discussion and share your feedback on:
-- [GitHub Issues](https://github.com/timothywarner/azure-windows-server-lab/issues)
-- [Contact Information](https://timw.info/az104)
-
----
-
-## 🌟 Acknowledgements
-
-Special thanks to the global community of IT pros, developers, and educators who inspire innovation every day. Together, let's embrace the future of Windows Server!
-
----
-
-**To-Do List:**
-
-- [ ] Develop and test Bicep templates for various deployment scenarios.
-- [ ] Create detailed documentation for setup and configuration.
-- [ ] Implement CI/CD workflows with GitHub Actions.
-- [ ] Gather community feedback and iterate on features.
-- [ ] Explore additional features like hybrid cloud scenarios and advanced security configurations.
-
----
-
+# Execute the deployment script
+./scripts/deploy.sh
