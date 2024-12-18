@@ -1,0 +1,37 @@
+# Azure Bicep and Deployment Artifacts
+*.json
+*.bicep.bak
+*.parameters.json
+*.tfstate*
+
+# Logs and Temp Files
+*.log
+*.tmp
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Node Modules (if JavaScript is used for tooling or validation)
+node_modules/
+
+# IDE Specific Files
+.vscode/
+.idea/
+*.code-workspace
+
+# Backup and Swap Files
+*.bak
+*.swp
+~$*
+
+# Test Artifacts
+coverage/
+test-results/
+
+# Sensitive Files
+*.env
+*.secrets
+
+# Other
+*.lock
