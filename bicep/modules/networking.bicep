@@ -1,54 +1,53 @@
 param location string
 param namePrefix string
 param environmentName string
+param networkConfig object
 param tags object
 
-// Variables
 var vnetName = '${namePrefix}-${environmentName}-vnet'
-var vnetAddressPrefix = '10.0.0.0/16'
 var serverSubnetName = 'ServerSubnet'
-var serverSubnetPrefix = '10.0.0.0/24'
 var clientSubnetName = 'ClientSubnet'
-var clientSubnetPrefix = '10.0.1.0/24'
+var bastionSubnetName = 'AzureBastionSubnet'
+var bastionHostName = '${namePrefix}-${environmentName}-bastion'
+var bastionPublicIPName = '${bastionHostName}-ip'
 
-// Network Security Groups
-resource serverNsg 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
-  name: '${serverSubnetName}-nsg'
-  location: location
-  tags: tags
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowRDP'
-        properties: {
-          priority: 1000
-          access: 'Allow'
-          direction: 'Inbound'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '3389'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-      {
-        name: 'AllowADPorts'
-        properties: {
-          priority: 1100
-          access: 'Allow'
-          direction: 'Inbound'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRanges: ['53', '88', '135', '389', '445', '464', '636', '3268-3269']
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-    ]
+// Deploy Server NSG
+module serverNsg 'nsg.bicep' = {
+  name: 'serverNsgDeployment'
+  params: {
+    location: location
+    namePrefix: namePrefix
+    environmentName: environmentName
+    tags: tags
+    nsgType: 'server'
   }
 }
 
-// Virtual Network
+// Deploy Client NSG
+module clientNsg 'nsg.bicep' = {
+  name: 'clientNsgDeployment'
+  params: {
+    location: location
+    namePrefix: namePrefix
+    environmentName: environmentName
+    tags: tags
+    nsgType: 'client'
+  }
+}
+
+// Public IP for Bastion
+resource bastionPublicIP 'Microsoft.Network/publicIPAddresses@2023-05-01' = {
+  name: bastionPublicIPName
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
 resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
   name: vnetName
   location: location
@@ -56,31 +55,62 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
   properties: {
     addressSpace: {
       addressPrefixes: [
-        vnetAddressPrefix
+        networkConfig.vnetAddressPrefix
       ]
     }
     subnets: [
       {
         name: serverSubnetName
         properties: {
-          addressPrefix: serverSubnetPrefix
+          addressPrefix: networkConfig.serverSubnetPrefix
           networkSecurityGroup: {
-            id: serverNsg.id
+            id: serverNsg.outputs.nsgId
           }
         }
       }
       {
         name: clientSubnetName
         properties: {
-          addressPrefix: clientSubnetPrefix
+          addressPrefix: networkConfig.clientSubnetPrefix
+          networkSecurityGroup: {
+            id: clientNsg.outputs.nsgId
+          }
+        }
+      }
+      {
+        name: bastionSubnetName
+        properties: {
+          addressPrefix: networkConfig.bastionSubnetPrefix
         }
       }
     ]
   }
 }
 
-// Outputs
+// Azure Bastion Host
+resource bastionHost 'Microsoft.Network/bastionHosts@2023-05-01' = {
+  name: bastionHostName
+  location: location
+  tags: tags
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'IpConf'
+        properties: {
+          subnet: {
+            id: '${vnet.id}/subnets/${bastionSubnetName}'
+          }
+          publicIPAddress: {
+            id: bastionPublicIP.id
+          }
+        }
+      }
+    ]
+  }
+}
+
 output vnetName string = vnet.name
 output vnetId string = vnet.id
 output serverSubnetId string = vnet.properties.subnets[0].id
-output clientSubnetId string = vnet.properties.subnets[1].id 
+output clientSubnetId string = vnet.properties.subnets[1].id
+output bastionHostName string = bastionHost.name

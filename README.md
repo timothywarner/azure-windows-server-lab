@@ -1,151 +1,93 @@
-# Azure Windows Server Lab
+# Azure Windows Server Lab Environment
 
-## 🌍 Inclusive and Global: Welcome to Windows Server 2025 Feature Testing!
+This project deploys a Windows Server lab environment in Azure using Bicep templates. The environment includes:
 
-This repository offers a **ready-to-use, Azure-based lab** for exploring the features of Windows Server in a **mixed-mode domain environment**. Whether you're an IT professional, developer, or educator, this project provides a practical and efficient way to learn, experiment, and test innovations in Windows Server.
+- A virtual network with proper subnets and security rules
+- An Azure Key Vault for secret management
+- Two Windows Server 2022 domain controllers in an Active Directory forest
 
-The goal is to give you a simple platform for testing and experimenting with Windows Server 2025. This solution was built using Microsoft proven practices from the following sources:
+## Prerequisites
 
-- [Microsoft Cloud Adoption Framework for Azure](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/)
-- [Microsoft Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/)
-- [Microsoft Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/architecture/framework/)
+- Azure subscription
+- Azure CLI or Azure PowerShell
+- Contributor access to the target subscription
+- A service principal or managed identity for deployment (for Key Vault access)
 
----
+## Architecture
 
-## 🎯 Project Overview
+The deployment creates the following resources:
+- Resource Group
+- Virtual Network with subnet for servers
+- Network Security Group with rules for RDP and Active Directory
+- Azure Key Vault for storing secrets
+- Two Windows Server 2022 VMs configured as domain controllers
 
-### **Name:** Azure Windows Server Lab
+## Deployment Instructions
 
-### **Short Description:**
-Easily deploy an Azure-based lab to explore mixed-mode domain configurations with Windows Server 2022 and 2025 using Bicep, Template Specs, and Azure CLI. You should be able to take the pilot environment in many different ways as you experiment with the new operating system release.
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/azure-windows-server-lab.git
+   cd azure-windows-server-lab
+   ```
 
-### **Purpose:**
-- Provide an **MVP-ready** lab environment for Windows Server testing.
-- Support a **mixed-mode domain** with multiple Windows Server versions.
-- Enable **modular deployments** using **Bicep**.
-- Utilize **Template Specs** for reusable and versioned infrastructure.
-- Promote best practices in Azure architecture, GitHub workflows, and documentation.
+2. Update the parameters file:
+   - Open `bicep/parameters.json`
+   - Update values according to your requirements
+   - Set the `deploymentPrincipalId` to your deployment identity's Object ID
 
-### **Audience:**
-- IT Professionals
-- Developers
-- Educators
-- Enthusiasts
+3. Deploy using Azure CLI:
+   ```bash
+   # Login to Azure
+   az login
 
----
+   # Set your subscription
+   az account set --subscription "Your Subscription Name"
 
-## 🚀 Features
+   # Deploy the Bicep template
+   az deployment sub create \
+     --name WindowsServerLab \
+     --location eastus \
+     --template-file bicep/main.bicep \
+     --parameters @bicep/parameters.json \
+     --parameters adminPassword="YourSecurePassword"
+   ```
 
-1. **Azure-Based Infrastructure:**
-   - Single VNet with two subnets:
-     - **Server Subnet:** Hosts Domain Controllers and member servers.
-     - **Client Subnet:** Hosts clients or fallback server-based clients.
+   Or using Azure PowerShell:
+   ```powershell
+   # Login to Azure
+   Connect-AzAccount
 
-2. **Mixed-Mode Domain Configuration:**
-   - Supports multiple Windows Server versions as Domain Controllers.
-   - Includes member servers and fallback clients.
+   # Set your subscription
+   Set-AzContext -Subscription "Your Subscription Name"
 
-3. **Bicep-Powered Deployment:**
-   - Modular Bicep templates for VNet, NSGs, VMs, and more.
-   - Centralized variables for quick customization.
+   # Deploy the Bicep template
+   New-AzDeployment `
+     -Name WindowsServerLab `
+     -Location eastus `
+     -TemplateFile bicep/main.bicep `
+     -TemplateParameterFile bicep/parameters.json `
+     -adminPassword (ConvertTo-SecureString -String "YourSecurePassword" -AsPlainText -Force)
+   ```
 
-4. **Template Specs for Versioning:**
-   - Publish Bicep templates as Template Specs for reusability and consistency.
-   - Easily manage versioned deployments.
+## Post-Deployment
 
-5. **GitHub Excellence:**
-   - CI/CD workflows with build badges.
-   - Comprehensive and beautifully structured README.
-   - Inclusive and mindful design.
+After deployment:
+1. Connect to DC1 using RDP
+2. Verify Active Directory installation
+3. Connect to DC2 and verify domain join
+4. Configure additional AD settings as needed
 
-6. **Global Inclusivity:**
-   - Designed to accommodate diverse users worldwide.
-   - Written with clear, accessible language.
+## Security Notes
 
----
+- The deployment uses a secure parameter for the admin password
+- NSG rules are configured for basic AD functionality
+- Key Vault is used for secret management
+- Update the admin password immediately after deployment
+- Consider implementing Azure Bastion for secure RDP access
 
-## 🛠️ Getting Started
+## Contributing
 
-### **Prerequisites**
-
-1. **Azure Subscription:** [Sign up for free](https://azure.microsoft.com/free/).
-2. **Azure CLI:** Ensure the Azure CLI is installed. If not, [install Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
-
----
-
-### Deployment Instructions
-
-#### Universal Deployment Using Azure CLI
-
-Run the following commands to deploy the lab:
-
-```bash
-# Clone the repository
-git clone https://github.com/timothywarner/azure-windows-server-lab.git
-cd azure-windows-server-lab
-
-# Validate Bicep templates (optional)
-az bicep build --file bicep/main.bicep
-
-# Deploy the main Bicep template
-az deployment sub create \
-  --template-file bicep/main.bicep \
-  --parameters @bicep/parameters.json
-
-Deploying with Template Specs
-To use Template Specs for deployment:
-
-bash
-Copy code
-# Publish the Bicep template as a Template Spec
-az ts create \
-  --name AzureWindowsServerLab \
-  --version 1.0 \
-  --resource-group <resource-group-name> \
-  --location <location> \
-  --template-file bicep/main.bicep
-
-# Deploy using the Template Spec
-az deployment group create \
-  --resource-group <resource-group-name> \
-  --template-spec /subscriptions/<subscription-id>/resourceGroups/<resource-group-name>/providers/Microsoft.Resources/templateSpecs/AzureWindowsServerLab/versions/1.0
-🔗 Competition and Inspirations
-Existing Projects:
-MSLab: A resource for Hyper-V environments.
-AdaptiveCloudLabKit: Focused on Azure Stack HCI.
-Windows Server on Hyper-V: Hyper-V-centric testing environment.
-This lab builds upon the best ideas from these projects while offering a cloud-native, Azure-focused solution.
-
-💡 Why Template Specs?
-Version Control: Simplifies updates and rollbacks with versioned templates.
-Reusability: Share Template Specs across teams for consistent deployments.
-Integration with CI/CD: Supports automated workflows for publishing and testing templates.
-🧠 Variables and Customization
-All deployment variables are centralized in parameters.json for ease of use. Modify them to:
-
-Adjust region or resource names.
-Configure the VM sizes and OS images.
-📜 License
-This project is licensed under the MIT License.
-
-✍️ Contributions
-All contributions are welcome! Please follow the Contributing Guide to submit your ideas, bug fixes, or improvements.
-
-📣 Community
-Join the discussion and share your feedback on:
-
-GitHub Issues
-Contact Information
-🌟 Acknowledgements
-Special thanks to the global community of IT pros, developers, and educators who inspire innovation every day. Together, let's embrace the future of Windows Server!
-
-To-Do List:
-
- Develop and test Bicep templates for various deployment scenarios.
- Create detailed documentation for setup and configuration.
- Implement CI/CD workflows with GitHub Actions.
- Publish and manage Template Specs for all infrastructure components.
- Explore additional features like hybrid cloud scenarios and advanced security configurations.
+Feel free to submit issues and enhancement requests!
 
 
 
