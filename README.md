@@ -6,9 +6,9 @@ This repository offers a **ready-to-use, Azure-based lab** for exploring the fea
 
 The goal is to give you a simple platform for testing and experimenting with Windows Server 2025. This solution was built using Microsoft proven practices from the following sources:
 
-- Microsoft Cloud Deployment Framework for Azure
-- Microsoft Azure Architecture Center
-- Microsoft Azure Well-Architected Framework
+- [Microsoft Cloud Adoption Framework for Azure](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/)
+- [Microsoft Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/)
+- [Microsoft Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/architecture/framework/)
 
 ---
 
@@ -69,16 +69,88 @@ Easily deploy an Azure-based lab to explore mixed-mode domain configurations wit
 ### **Prerequisites**
 
 1. **Azure Subscription:** [Sign up for free](https://azure.microsoft.com/free/).
-2. **Azure CLI:** The deployment scripts will guide you to install it if not present.
+2. **Azure CLI:** Ensure the Azure CLI is installed. If not, [install Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+---
 
 ### Deployment Instructions
 
-#### Windows WSL 2/macOS/Linux
+#### Universal Deployment Using Azure CLI
 
-Run the following commands:
+Run the following commands to deploy the lab:
+
 ```bash
-# Navigate to the repo directory
+# Clone the repository
+git clone https://github.com/timothywarner/azure-windows-server-lab.git
 cd azure-windows-server-lab
 
-# Execute the deployment script
-./scripts/deploy.sh
+# Validate Bicep templates (optional)
+az bicep build --file bicep/main.bicep
+
+# Deploy the main Bicep template
+az deployment sub create \
+  --template-file bicep/main.bicep \
+  --parameters @bicep/parameters.json
+
+Deploying with Template Specs
+To use Template Specs for deployment:
+
+bash
+Copy code
+# Publish the Bicep template as a Template Spec
+az ts create \
+  --name AzureWindowsServerLab \
+  --version 1.0 \
+  --resource-group <resource-group-name> \
+  --location <location> \
+  --template-file bicep/main.bicep
+
+# Deploy using the Template Spec
+az deployment group create \
+  --resource-group <resource-group-name> \
+  --template-spec /subscriptions/<subscription-id>/resourceGroups/<resource-group-name>/providers/Microsoft.Resources/templateSpecs/AzureWindowsServerLab/versions/1.0
+🔗 Competition and Inspirations
+Existing Projects:
+MSLab: A resource for Hyper-V environments.
+AdaptiveCloudLabKit: Focused on Azure Stack HCI.
+Windows Server on Hyper-V: Hyper-V-centric testing environment.
+This lab builds upon the best ideas from these projects while offering a cloud-native, Azure-focused solution.
+
+💡 Why Template Specs?
+Version Control: Simplifies updates and rollbacks with versioned templates.
+Reusability: Share Template Specs across teams for consistent deployments.
+Integration with CI/CD: Supports automated workflows for publishing and testing templates.
+🧠 Variables and Customization
+All deployment variables are centralized in parameters.json for ease of use. Modify them to:
+
+Adjust region or resource names.
+Configure the VM sizes and OS images.
+📜 License
+This project is licensed under the MIT License.
+
+✍️ Contributions
+All contributions are welcome! Please follow the Contributing Guide to submit your ideas, bug fixes, or improvements.
+
+📣 Community
+Join the discussion and share your feedback on:
+
+GitHub Issues
+Contact Information
+🌟 Acknowledgements
+Special thanks to the global community of IT pros, developers, and educators who inspire innovation every day. Together, let's embrace the future of Windows Server!
+
+To-Do List:
+
+ Develop and test Bicep templates for various deployment scenarios.
+ Create detailed documentation for setup and configuration.
+ Implement CI/CD workflows with GitHub Actions.
+ Publish and manage Template Specs for all infrastructure components.
+ Explore additional features like hybrid cloud scenarios and advanced security configurations.
+
+
+
+
+
+
+
+
